@@ -1,0 +1,13 @@
+node_modules/
+.env
+.env.*
+*.log
+logs/
+wallet_balance_snapshots.json
+dist/
+build/
+.next/
+*.bak
+*.backup
+.DS_Store
+Thumbs.db
