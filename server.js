@@ -828,7 +828,7 @@ async function calculateAssetSummary(userId, characterId, assets, currentShip, a
     days_until_7d_change: Math.max(0, 7 - firstSnapshotAgeDays),
     days_until_14d_change: Math.max(0, 14 - firstSnapshotAgeDays),
     days_until_30d_change: Math.max(0, 30 - firstSnapshotAgeDays),
-    history: await getHistory(30),
+    history: await getHistory(180),
     asset_locations: assetLocations
   };
 }
@@ -1142,7 +1142,7 @@ async function saveDailyWalletSnapshot(userId, characterId, walletBalance) {
   store[key] = store[key]
     .filter(row => row && row.created_at && row.balance !== null && row.balance !== undefined)
     .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
-    .slice(-120);
+    .slice(-365);
 
   writeWalletSnapshotStore(store);
 }
@@ -1199,7 +1199,7 @@ async function calculateWalletSummary(userId, characterId, walletBalance) {
     current_balance: balance,
     change_30d: getWalletSnapshotChange(userId, characterId, balance, 30),
     days_until_30d_change: Math.max(0, 30 - firstAgeDays),
-    history: getWalletSnapshotHistory(userId, characterId, 30)
+    history: getWalletSnapshotHistory(userId, characterId, 180)
   };
 }
 
