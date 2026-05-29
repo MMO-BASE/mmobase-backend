@@ -457,10 +457,16 @@ async function fetchAllCharacterAssets(characterId, headers) {
 async function resolveAssetLocationNames(locationIds, accessToken) {
   const result = {};
   const ids = Array.from(new Set((locationIds || []).filter(Boolean)));
-  const numericIds = ids.map(id => Number(id)).filter(id => Number.isFinite(id));
+  const numericIds = ids
+    .map(id => Number(id))
+    .filter(id => Number.isFinite(id) && id > 0);
 
-  // First try universe/names in bulk.
-  for (const chunk of chunkArray(numericIds, 900)) {
+  // First try universe/names in bulk for normal public location IDs only.
+  // Very large player-structure/item-style IDs can cause ESI /universe/names to return 400,
+  // so those are resolved later through the authenticated structures endpoint instead.
+  const namesLookupIds = numericIds.filter(id => id < 1000000000000);
+
+  for (const chunk of chunkArray(namesLookupIds, 900)) {
     try {
       const resp = await axios.post(
         'https://esi.evetech.net/latest/universe/names/?datasource=tranquility',
