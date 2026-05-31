@@ -1,6 +1,14 @@
 const axios = require('axios');
 const supabase = require('../config/supabase');
 
+const ASSET_DEBUG_LOGS = process.env.ASSET_DEBUG_LOGS === 'true';
+
+function assetDebugLog() {
+  if (ASSET_DEBUG_LOGS) {
+    console.log.apply(console, arguments);
+  }
+}
+
 const ASSET_PRICE_STATION_ID = 60003760; // Jita 4-4
 const ASSET_PRICE_REGION_ID = 10000002; // The Forge
 const assetTypeCache = {};
@@ -123,7 +131,7 @@ function chooseFinalAssetPrice(typeId, stationMarket, regionMarket, esiPrice) {
 
   const highReference = Math.max(regionSell, buyBest, esiBest);
   if (highReference > 0 && price > 0 && price < highReference * 0.25) {
-    console.log('Corrected underpriced asset type ' + typeId + ': chosen=' + price + ', reference=' + highReference + ', source=' + source);
+    assetDebugLog('Corrected underpriced asset type ' + typeId + ': chosen=' + price + ', reference=' + highReference + ', source=' + source);
     price = highReference;
     source = 'underprice_correction';
   }
@@ -135,7 +143,7 @@ function chooseFinalAssetPrice(typeId, stationMarket, regionMarket, esiPrice) {
   // This is intended for items like vanity clothing / very thinly traded goods.
   if (price > 0 && conservativeReference > 0 && price > conservativeReference * 5) {
     const corrected = Math.max(conservativeReference, buyBest * 1.15, esiBest);
-    console.log('Corrected inflated asset type ' + typeId + ': chosen=' + price + ', corrected=' + corrected + ', buyBest=' + buyBest + ', esiBest=' + esiBest + ', source=' + source);
+    assetDebugLog('Corrected inflated asset type ' + typeId + ': chosen=' + price + ', corrected=' + corrected + ', buyBest=' + buyBest + ', esiBest=' + esiBest + ', source=' + source);
     price = corrected;
     source = 'inflation_correction';
   }
@@ -361,7 +369,7 @@ async function resolveAssetLocationNames(locationIds, accessToken) {
     }
   }
 
-  console.log('Resolved asset location names: ' + JSON.stringify(result));
+  assetDebugLog('Resolved asset location names: ' + JSON.stringify(result));
   return result;
 }
 
@@ -549,18 +557,18 @@ async function calculateAssetSummary(userId, characterId, assets, currentShip, a
     }));
   }
 
-  console.log('Asset locations returned to frontend: ' + JSON.stringify(assetLocations.map(loc => ({ name: loc.name, value: loc.value, item_count: loc.item_count })).slice(0, 10)));
+  assetDebugLog('Asset locations returned to frontend: ' + JSON.stringify(assetLocations.map(loc => ({ name: loc.name, value: loc.value, item_count: loc.item_count })).slice(0, 10)));
 
   const priceSourceCounts = {};
   for (const asset of pricedAssets) {
     const source = asset.price_source || 'unknown';
     priceSourceCounts[source] = (priceSourceCounts[source] || 0) + 1;
   }
-  console.log('Asset pricing source counts: ' + JSON.stringify(priceSourceCounts));
-  console.log('Blueprint asset types ignored for valuation: ' + JSON.stringify(Array.from(blueprintTypeIds)));
+  assetDebugLog('Asset pricing source counts: ' + JSON.stringify(priceSourceCounts));
+  assetDebugLog('Blueprint asset types ignored for valuation: ' + JSON.stringify(Array.from(blueprintTypeIds)));
 
-  console.log('Asset valuation summary for character ' + characterId + ': total=' + totalValue.toFixed(0) + ', records=' + assets.length + ', priced=' + pricedAssets.length + ', unpriced=' + unpricedAssetCount + ', ships=' + shipCount + ', stations=' + topLevelLocations.size + '. Asset total is assets only; wallet ISK is not included.');
-  console.log('Top valued asset type IDs: ' + JSON.stringify(pricedAssets.slice(0, 10)));
+  assetDebugLog('Asset valuation summary for character ' + characterId + ': total=' + totalValue.toFixed(0) + ', records=' + assets.length + ', priced=' + pricedAssets.length + ', unpriced=' + unpricedAssetCount + ', ships=' + shipCount + ', stations=' + topLevelLocations.size + '. Asset total is assets only; wallet ISK is not included.');
+  assetDebugLog('Top valued asset type IDs: ' + JSON.stringify(pricedAssets.slice(0, 10)));
 
   const topNamedAssets = pricedAssets.slice(0, 15);
   for (const item of topNamedAssets) {
@@ -572,7 +580,7 @@ async function calculateAssetSummary(userId, characterId, assets, currentShip, a
       item.name = 'Type ID ' + item.type_id;
     }
   }
-  console.log('Top valued assets with names: ' + JSON.stringify(topNamedAssets));
+  assetDebugLog('Top valued assets with names: ' + JSON.stringify(topNamedAssets));
 
 
   const unpricedTypes = {};
@@ -598,7 +606,7 @@ async function calculateAssetSummary(userId, characterId, assets, currentShip, a
       item.name = 'Type ID ' + item.type_id;
     }
   }
-  console.log('Unpriced asset type IDs: ' + JSON.stringify(unpricedList));
+  assetDebugLog('Unpriced asset type IDs: ' + JSON.stringify(unpricedList));
 
 
   const nowIso = new Date().toISOString();
