@@ -15,7 +15,7 @@ const { clearCharacterNeedsRelink } = require('../services/tokenStatusService');
 
 const router = express.Router();
 
-const FRONTEND_BASE_URL = process.env.FRONTEND_BASE_URL || 'https://v2.mmobase.co.uk';
+const FRONTEND_BASE_URL = process.env.FRONTEND_BASE_URL || 'https://mmobase.co.uk';
 
 router.get('/auth/eve', (req, res) => {
   const mmobaseToken = req.query.token;
