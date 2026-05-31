@@ -1,13 +1,26 @@
+# Dependencies
 node_modules/
+
+# Environment / secrets
 .env
 .env.*
+!.env.example
+
+# Runtime/generated data
+wallet_balance_snapshots.json
+eve_token_status.json
 *.log
 logs/
-wallet_balance_snapshots.json
-dist/
-build/
-.next/
+
+# Backups / editor temp files
 *.bak
-*.backup
+*.bak*
+*.swp
+*.swo
+.server.js.swp
+
+# OS/editor
 .DS_Store
 Thumbs.db
+.vscode/
+.idea/
