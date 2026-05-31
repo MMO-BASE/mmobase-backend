@@ -44,7 +44,7 @@ async function getFreshAccessTokenForCharacter(characterId) {
         const firstMark = markCharacterNeedsRelink(characterId, 'invalid_grant');
 
         if (firstMark) {
-          console.warn('EVE refresh token expired/revoked for character ' + characterId + '. Marked as needing re-link.');
+          console.log('EVE refresh token expired/revoked for character ' + characterId + '. Marked as needing re-link.');
         }
 
         return null;
