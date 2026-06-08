@@ -119,7 +119,11 @@ router.get('/callback', async (req, res) => {
     const existingChar = existingCharResult.data;
 
     if (existingChar && existingChar.user_id !== user.id) {
-      return res.redirect(FRONTEND_BASE_URL + '/dashboard?error=character_already_linked');
+      const alreadyLinkedRedirect = stateData.from === 'settings'
+        ? '/settings?tab=linked&error=character_already_linked'
+        : '/dashboard?error=character_already_linked';
+
+      return res.redirect(FRONTEND_BASE_URL + alreadyLinkedRedirect);
     }
 
     if (existingChar) {
@@ -183,10 +187,13 @@ router.get('/callback', async (req, res) => {
     clearCharacterNeedsRelink(characterId);
 
     const redirectPage = stateData.from === 'settings' ? '/settings' : '/dashboard';
+    const redirectQuery = stateData.from === 'settings'
+      ? '?tab=linked&eve_linked=success&character='
+      : '?eve_linked=success&character=';
 
     res.redirect(
       FRONTEND_BASE_URL + redirectPage +
-      '?eve_linked=success&character=' + encodeURIComponent(characterName)
+      redirectQuery + encodeURIComponent(characterName)
     );
   } catch (error) {
     console.error(

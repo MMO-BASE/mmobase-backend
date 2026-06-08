@@ -56,4 +56,49 @@ router.get('/', async (req, res) => {
   res.json({ characters: decoratedCharacters });
 });
 
+router.delete('/:characterId', async (req, res) => {
+  const user = await getAuthenticatedUser(req, res);
+  if (!user) return;
+
+  const characterId = String(req.params.characterId || '').trim();
+
+  if (!characterId) {
+    return res.status(400).json({ error: 'Missing character id' });
+  }
+
+  const charResult = await supabase
+    .from('eve_characters')
+    .select('id, character_id, character_name, user_id')
+    .eq('character_id', characterId)
+    .eq('user_id', user.id)
+    .single();
+
+  if (charResult.error || !charResult.data) {
+    return res.status(404).json({ error: 'Character not found for this account' });
+  }
+
+  const tokenDelete = await supabase
+    .from('eve_tokens')
+    .delete()
+    .eq('character_id', characterId);
+
+  if (tokenDelete.error) {
+    console.error('Failed to delete EVE token:', tokenDelete.error);
+    return res.status(500).json({ error: 'Failed to remove EVE token' });
+  }
+
+  const characterDelete = await supabase
+    .from('eve_characters')
+    .delete()
+    .eq('character_id', characterId)
+    .eq('user_id', user.id);
+
+  if (characterDelete.error) {
+    console.error('Failed to delete EVE character:', characterDelete.error);
+    return res.status(500).json({ error: 'Failed to remove EVE character' });
+  }
+
+  res.json({ ok: true, character_id: characterId });
+});
+
 module.exports = router;
