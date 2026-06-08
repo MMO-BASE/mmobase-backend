@@ -23,7 +23,7 @@ async function getAuthenticatedUser(req, res) {
 async function getOwnedCharacter(userId, characterId) {
   const charResult = await supabase
     .from('eve_characters')
-    .select('*')
+    .select('id, user_id, character_id, character_name, corporation_id, corporation_name, alliance_id, alliance_name, is_primary, portrait_url, affiliation_checked_at')
     .eq('character_id', characterId)
     .eq('user_id', userId)
     .single();

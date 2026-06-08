@@ -9,7 +9,7 @@ const {
 async function getFreshAccessTokenForCharacter(characterId) {
   const tokenResult = await supabase
     .from('eve_tokens')
-    .select('*')
+    .select('character_id, access_token, refresh_token, expires_at')
     .eq('character_id', characterId)
     .single();
 

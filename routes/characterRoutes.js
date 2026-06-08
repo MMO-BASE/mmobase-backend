@@ -11,7 +11,7 @@ router.get('/', async (req, res) => {
 
   const charsResult = await supabase
     .from('eve_characters')
-    .select('*')
+    .select('id, character_id, character_name, corporation_id, corporation_name, alliance_id, alliance_name, is_primary, portrait_url')
     .eq('user_id', user.id)
     .order('is_primary', { ascending: false });
 

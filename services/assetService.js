@@ -253,6 +253,7 @@ async function saveDailyAssetSnapshot(snapshot) {
       .from('asset_value_snapshots')
       .select('id')
       .eq('character_id', snapshot.character_id)
+      .eq('user_id', snapshot.user_id)
       .gte('created_at', start.toISOString())
       .lt('created_at', end.toISOString())
       .order('created_at', { ascending: false })
@@ -629,6 +630,7 @@ async function calculateAssetSummary(userId, characterId, assets, currentShip, a
         .from('asset_value_snapshots')
         .select('total_value, created_at')
         .eq('character_id', characterId)
+        .eq('user_id', userId)
         .lte('created_at', target)
         .order('created_at', { ascending: false })
         .limit(1);
@@ -649,6 +651,7 @@ async function calculateAssetSummary(userId, characterId, assets, currentShip, a
         .from('asset_value_snapshots')
         .select('total_value, created_at')
         .eq('character_id', characterId)
+        .eq('user_id', userId)
         .gte('created_at', since)
         .order('created_at', { ascending: true });
 
@@ -665,6 +668,7 @@ async function calculateAssetSummary(userId, characterId, assets, currentShip, a
       .from('asset_value_snapshots')
       .select('created_at')
       .eq('character_id', characterId)
+      .eq('user_id', userId)
       .order('created_at', { ascending: true })
       .limit(1);
 

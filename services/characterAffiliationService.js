@@ -44,8 +44,8 @@ async function refreshCharacterAffiliationIfStale(character) {
     const updateResult = await supabase
       .from('eve_characters')
       .update(updatePayload)
-      .eq('character_id', character.character_id)
-      .select('*')
+      .eq('id', character.id)
+      .select('id, user_id, character_id, character_name, corporation_id, corporation_name, alliance_id, alliance_name, is_primary, portrait_url, affiliation_checked_at')
       .single();
 
     if (updateResult.data) return updateResult.data;
