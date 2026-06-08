@@ -10,13 +10,14 @@ const characterDataRoutes = require('./routes/characterDataRoutes');
 const { scheduleDailyAssetSnapshots } = require('./jobs/dailySnapshots');
 
 const app = express();
+app.disable('x-powered-by');
 app.set('trust proxy', 1);
 app.use(cors({
-  origin: ['https://mmobase.co.uk', 'https://v2.mmobase.co.uk'],
+  origin: ['https://mmobase.co.uk', 'https://react.mmobase.co.uk'],
   credentials: true
 }));
 app.use(cookieParser());
-app.use(express.json());
+app.use(express.json({ limit: '100kb' }));
 
 // Basic abuse protection / rate limiting
 

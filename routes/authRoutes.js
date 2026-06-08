@@ -12,10 +12,33 @@ const {
   consumeOAuthState
 } = require('../services/oauthStateService');
 const { clearCharacterNeedsRelink } = require('../services/tokenStatusService');
+const { getAuthenticatedUser } = require('../middleware/auth');
 
 const router = express.Router();
 
 const FRONTEND_BASE_URL = process.env.FRONTEND_BASE_URL || 'https://mmobase.co.uk';
+
+
+router.post('/auth/eve/start', async (req, res) => {
+  const user = await getAuthenticatedUser(req, res);
+  if (!user) return;
+
+  const from = req.body && req.body.from === 'settings' ? 'settings' : 'dashboard';
+
+  const state = createOAuthState({
+    user_id: user.id,
+    from: from
+  });
+
+  const authUrl = EVE_AUTH_URL +
+    '?response_type=code' +
+    '&redirect_uri=' + encodeURIComponent(process.env.EVE_CALLBACK_URL) +
+    '&client_id=' + encodeURIComponent(process.env.EVE_CLIENT_ID) +
+    '&scope=' + encodeURIComponent(SCOPES) +
+    '&state=' + encodeURIComponent(state);
+
+  return res.json({ authUrl: authUrl });
+});
 
 router.get('/auth/eve', (req, res) => {
   const mmobaseToken = req.query.token;
@@ -51,15 +74,21 @@ router.get('/callback', async (req, res) => {
   try {
     const stateData = consumeOAuthState(String(state || ''));
 
-    if (!stateData || !stateData.token) {
+    if (!stateData || (!stateData.user_id && !stateData.token)) {
       return res.redirect(FRONTEND_BASE_URL + '/dashboard?error=invalid_state');
     }
 
-    const mmobaseToken = stateData.token;
-    const userData = await supabase.auth.getUser(mmobaseToken);
-    const user = userData && userData.data ? userData.data.user : null;
+    let user = null;
 
-    if (!user) {
+    if (stateData.user_id) {
+      user = { id: stateData.user_id };
+    } else if (stateData.token) {
+      const mmobaseToken = stateData.token;
+      const userData = await supabase.auth.getUser(mmobaseToken);
+      user = userData && userData.data ? userData.data.user : null;
+    }
+
+    if (!user || !user.id) {
       return res.redirect(FRONTEND_BASE_URL + '/dashboard?error=invalid_session');
     }
 
